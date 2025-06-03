@@ -6,19 +6,31 @@ import * as trafficDemo from './demos/traffic';
 import * as swallowedAFlyDemo from './demos/swallowedAFly';
 import * as spaceGravityDemo from './demos/spaceGravity';
 
+const BASE_URL = import.meta.env.BASE_URL;
+
 const DEMOS = [
-	{ name: 'BUG LIFE', emoji: '🐝', background: "url('/bg/bees.jpg') center/cover no-repeat fixed", module: beesDemo },
-	{ name: 'RPS', emoji: '✂️', background: "url('/bg/rps.jpg') center/cover no-repeat fixed", module: rpsDemo },
+	{
+		name: 'BUG LIFE',
+		emoji: '🐝',
+		background: `url('${BASE_URL}bg/bees.jpg') center/cover no-repeat fixed`,
+		module: beesDemo,
+	},
+	{
+		name: 'RPS',
+		emoji: '✂️',
+		background: `url('${BASE_URL}bg/rps.jpg') center/cover no-repeat fixed`,
+		module: rpsDemo,
+	},
 	{
 		name: 'TRAFFIC',
 		emoji: '🚗',
-		background: "url('/bg/traffic.webp') repeat fixed",
+		background: `url('${BASE_URL}bg/traffic.webp') repeat fixed`,
 		module: trafficDemo,
 	},
 	{
 		name: 'GREAT CHASE',
 		emoji: '🐭',
-		background: "url('/bg/swallowed_a_fly.jpg') center/cover no-repeat fixed",
+		background: `url('${BASE_URL}bg/swallowed_a_fly.jpg') center/cover no-repeat fixed`,
 		module: swallowedAFlyDemo,
 	},
 	{ name: 'SPACE', emoji: '👽', background: '#000', module: spaceGravityDemo },
