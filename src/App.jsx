@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { setDemoTitle } from './lib/util';
+import handleTouch from './lib/handleTouch';
 import * as beesDemo from './demos/bees';
 import * as rpsDemo from './demos/rockPaperScissors';
 import * as trafficDemo from './demos/traffic';
@@ -37,13 +38,8 @@ const DEMOS = [
 ];
 
 window.isTrailsEnabled = false;
-document.addEventListener('keydown', event => {
-	if (event.key === ' ') {
-		window.isTrailsEnabled = !window.isTrailsEnabled;
-	}
-});
 
-alert('Use arrow keys to navigate between demos. Click spacebar to toggle trails.');
+alert('Use arrow keys / swipe to navigate between demos. Click spacebar / double tap to toggle trails.');
 
 export default function App() {
 	const canvasRef = useRef(null);
@@ -66,6 +62,8 @@ export default function App() {
 				setCurrentDemoIndex(prevIndex => (prevIndex + 1) % DEMOS.length);
 			} else if (e.code === 'ArrowLeft') {
 				setCurrentDemoIndex(prevIndex => (prevIndex - 1 + DEMOS.length) % DEMOS.length);
+			} else if (e.code === 'Space') {
+				window.isTrailsEnabled = !window.isTrailsEnabled;
 			}
 		}
 		window.addEventListener('keydown', handleKeyDown);
@@ -75,14 +73,51 @@ export default function App() {
 		};
 	}, []);
 
+	useEffect(() => {
+		let lastTap = 0;
+		function handleTouchStart(e) {
+			if (e.touches.length !== 1) {
+				lastTap = 0;
+				return;
+			}
+
+			const currentTime = new Date().getTime();
+			const doubleTapDelay = currentTime - lastTap;
+			if (doubleTapDelay < 500 && doubleTapDelay > 0) {
+				window.isTrailsEnabled = !window.isTrailsEnabled;
+			}
+			lastTap = currentTime;
+		}
+		window.addEventListener('touchstart', handleTouchStart);
+
+		return () => {
+			window.removeEventListener('touchstart', handleTouchStart);
+		};
+	}, []);
+
 	return (
-		<canvas
-			ref={canvasRef}
-			style={{
-				width: '100dvw',
-				height: '100dvh',
-				display: 'block',
+		<div
+			style={{ height: '100dvh', width: '100dvw', display: 'flex' }}
+			ref={element => {
+				if (!element) return;
+
+				const cleanupFn = handleTouch(element, (direction, diff) => {
+					if (direction === 'x') {
+						if (diff > 0) {
+							// Right swipe
+							setCurrentDemoIndex(prevIndex => (prevIndex - 1 + DEMOS.length) % DEMOS.length);
+						} else {
+							// Left swipe
+							setCurrentDemoIndex(prevIndex => (prevIndex + 1) % DEMOS.length);
+						}
+						return { skip: true }; // Only process one swipe at a time
+					}
+				});
+
+				return cleanupFn;
 			}}
-		/>
+		>
+			<canvas ref={canvasRef} style={{ height: '100%', width: '100%' }} />
+		</div>
 	);
 }
