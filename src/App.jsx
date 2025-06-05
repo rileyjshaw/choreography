@@ -43,8 +43,13 @@ alert('Use arrow keys / swipe to navigate between demos. Click spacebar / double
 
 export default function App() {
 	const canvasRef = useRef(null);
+	const lastTapRef = useRef(0);
 	const [currentDemoIndex, setCurrentDemoIndex] = useState(0);
 	const stopFunctionRef = useRef(null);
+
+	const registerIneligibleDoubleTap = () => {
+		lastTapRef.current = 0;
+	};
 
 	useEffect(() => {
 		const currentDemo = DEMOS[currentDemoIndex];
@@ -74,19 +79,18 @@ export default function App() {
 	}, []);
 
 	useEffect(() => {
-		let lastTap = 0;
 		function handleTouchStart(e) {
 			if (e.touches.length !== 1) {
-				lastTap = 0;
+				registerIneligibleDoubleTap();
 				return;
 			}
 
 			const currentTime = new Date().getTime();
-			const doubleTapDelay = currentTime - lastTap;
+			const doubleTapDelay = currentTime - lastTapRef.current;
 			if (doubleTapDelay < 500 && doubleTapDelay > 0) {
 				window.isTrailsEnabled = !window.isTrailsEnabled;
 			}
-			lastTap = currentTime;
+			lastTapRef.current = currentTime;
 		}
 		window.addEventListener('touchstart', handleTouchStart);
 
@@ -110,6 +114,7 @@ export default function App() {
 							// Left swipe
 							setCurrentDemoIndex(prevIndex => (prevIndex + 1) % DEMOS.length);
 						}
+						registerIneligibleDoubleTap();
 						return { skip: true }; // Only process one swipe at a time
 					}
 				});
